@@ -1228,11 +1228,20 @@ validate_headers(RequestHeaders, _, _) ->
 scheme_defaults() ->
     [{http, 80}, {https, 443}].
 
+valid_uri_schemes() ->
+    ["http", "https"].
+
+scheme_validation(Scheme) ->
+    case lists:member(Scheme, valid_uri_schemes()) of
+      true -> valid;
+      false -> {error, {unsupported_uri_scheme, Scheme}}
+    end.
+
 uri_parse(URI) ->
-    http_uri:parse(URI, [{scheme_defaults, scheme_defaults()}]).
+    http_uri:parse(URI, [{scheme_defaults, scheme_defaults()}, {scheme_validation_fun, fun scheme_validation/1}]).
 
 uri_parse(URI, Opts) ->
-    http_uri:parse(URI, [{scheme_defaults, scheme_defaults()} | Opts]).
+    http_uri:parse(URI, [{scheme_defaults, scheme_defaults()} | [{scheme_validation_fun, fun scheme_validation/1} | Opts]]).
 
 
 %%--------------------------------------------------------------------------
